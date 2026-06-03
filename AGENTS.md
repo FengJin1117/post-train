@@ -8,17 +8,9 @@ reasoning study, use Qwen2.5/Qwen2.5-Math models and keep experiment outputs und
 
 ## conda environment
 
-conda activate ms-swfit
+vllm 评测场景（benchmark），使用环境：
+`conda activate vllm`
 
-
-## Setup
-
-```bash
-pip install -e .
-pip install -e '.[eval]'       # EvalScope benchmark evaluation
-pip install deepspeed -U       # add --deepspeed zero2/zero3 when needed
-pip install math_verify        # built-in GRPO math accuracy reward
-```
 
 ## Relevant Paths
 
