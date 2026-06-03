@@ -69,3 +69,71 @@ raw/full/gsm8k/eval_output/native/20260602_121011/
 
 At report time, `/data2` had no generally available disk space remaining. This baseline added approximately `20 MiB`
 under `raw/`; the full-disk host state was not caused by the experiment artifacts.
+
+## AIME 25 Evaluation
+
+Status: completed
+
+### Evaluation Policy
+
+- Model: `Qwen/Qwen3-4B-Instruct-2507`
+- Local model path: `/data2/fwh/.cache/modelscope/hub/models/Qwen/Qwen3-4B-Instruct-2507`
+- Benchmark: `aime25` (`AIME-2025`)
+- Backend: Native EvalScope with vLLM
+- Prompting: EvalScope default AIME25 0-shot math prompt
+- Generation: deterministic decoding, `max_tokens=8192`, thinking disabled (`qwen3_nothinking`)
+- Scoring: rule-based scoring only; no LLM judge
+- GPU: `4` (`NVIDIA RTX A6000`)
+- Evaluation date: `2026-06-03` UTC
+
+### Results
+
+| Benchmark | Samples | Accuracy | Runtime |
+| --- | ---: | ---: | ---: |
+| AIME 25 | 30 | 0.4000 (12/30) | 543.00s |
+
+The EvalScope benchmark phase took about `543.00s` (`9m 03s`). The full `swift eval` process, including vLLM startup
+and shutdown, ran from `2026-06-03T04:51:51Z` to `2026-06-03T05:02:58Z` and took `666.85s`.
+
+EvalScope reported average latency `122.102507s`, average output throughput `47.47 tok/s`, and average output length
+`5796.266667` tokens.
+
+### Command
+
+```bash
+CUDA_VISIBLE_DEVICES=4 swift eval \
+  --model /data2/fwh/.cache/modelscope/hub/models/Qwen/Qwen3-4B-Instruct-2507 \
+  --enable_thinking false \
+  --eval_dataset aime25 \
+  --eval_backend Native \
+  --infer_backend vllm \
+  --vllm_tensor_parallel_size 1 \
+  --vllm_gpu_memory_utilization 0.9 \
+  --vllm_max_model_len 10000 \
+  --eval_generation_config '{"max_tokens":8192,"temperature":0.0,"do_sample":false}' \
+  --extra_eval_args '{"judge_strategy":"rule"}' \
+  --eval_num_proc 8
+```
+
+### Verification
+
+- Full prediction and review files: `30` records each.
+- Rule-scored correct samples: `12/30`; correct sample indices are `0, 2, 3, 5, 7, 15, 16, 17, 18, 21, 23, 26`.
+- Output sanity check: `30/30` predictions are non-empty and have extractable answers; `17/30` include a `\boxed{}` answer.
+- Fourteen outputs reached the `8192` token generation limit at sample indices `1, 4, 6, 8, 9, 10, 11, 19, 20, 22, 24, 27, 28, 29`; EvalScope still completed rule scoring.
+- GPU `4` was released after evaluation.
+
+### Raw Artifacts
+
+Raw logs, predictions, reviews, and EvalScope reports are stored locally under `raw/` and intentionally excluded from
+Git. The full EvalScope output is under:
+
+```text
+raw/aime25-qwen3-4b-instruct-2507/full/eval_output/native/20260603_045354/
+```
+
+The top-level EvalScope result file is under:
+
+```text
+raw/aime25-qwen3-4b-instruct-2507/full/result/Qwen3-4B-Instruct-2507/eval_result.jsonl
+```

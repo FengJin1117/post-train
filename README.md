@@ -8,17 +8,18 @@
 
 在统一训练预算下，基于 GSM8K、MATH 等 Benchmark 对不同后训练方法进行评测，对比其在推理准确率、训练稳定性、参数效率和资源开销等方面的表现，分析不同策略之间的性能权衡关系。
 
-| Method     | GSM8K | MATH | GSM-Hard | AIME25 |
-| ---------- | ----- | ----- | -------- | ------ |
-| Base Model | TBD   | TBD   | TBD      | TBD    |
-| Full SFT   | TBD   | TBD   | TBD      | TBD    |
-| LoRA-SFT   | TBD   | TBD   | TBD      | TBD    |
-| DPO        | TBD   | TBD   | TBD      | TBD    |
-| PPO        | TBD   | TBD   | TBD      | TBD    |
-| GRPO       | TBD   | TBD   | TBD      | TBD    |
-| DAPO       | TBD   | TBD   | TBD      | TBD    |
+
+| Method     | GSM8K | MATH-500 | GAOKAO | AIME25 |
+| ---------- | ----: | -------: | -----: | -----: |
+| Base Model | 84.69 |    66.60 |   TBD  |   3.33 |
+| Full SFT   |  TBD  |     TBD  |   TBD  |   TBD  |
+| LoRA-SFT   |  TBD  |     TBD  |   TBD  |   TBD  |
+| DPO        |  TBD  |     TBD  |   TBD  |   TBD  |
+| PPO        |  TBD  |     TBD  |   TBD  |   TBD  |
+| GRPO       |  TBD  |     TBD  |   TBD  |   TBD  |
+| DAPO       |  TBD  |     TBD  |   TBD  |   TBD  |
 | Agent   | TBD   | TBD   | TBD      | TBD    |
-- Base Model：
+- Base Model： [Qwen2.5-3B-Instruct](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct)
 
 - 添加benchmark：Gaokao
 
