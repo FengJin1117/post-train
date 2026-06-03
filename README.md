@@ -1,4 +1,4 @@
-# 基于后训练的大语言模型数学推理能力增强研究
+# 基于后训练的 LLM 数学推理能力增强
 
 ## 项目简介
 
@@ -8,14 +8,19 @@
 
 在统一训练预算下，基于 GSM8K、MATH 等 Benchmark 对不同后训练方法进行评测，对比其在推理准确率、训练稳定性、参数效率和资源开销等方面的表现，分析不同策略之间的性能权衡关系。
 
-| Method     | GSM8K | MATH | GSM-Hard | AIME24 |
+| Method     | GSM8K | MATH | GSM-Hard | AIME25 |
 | ---------- | ----- | ----- | -------- | ------ |
 | Base Model | TBD   | TBD   | TBD      | TBD    |
 | Full SFT   | TBD   | TBD   | TBD      | TBD    |
 | LoRA-SFT   | TBD   | TBD   | TBD      | TBD    |
 | DPO        | TBD   | TBD   | TBD      | TBD    |
+| PPO        | TBD   | TBD   | TBD      | TBD    |
 | GRPO       | TBD   | TBD   | TBD      | TBD    |
+| DAPO       | TBD   | TBD   | TBD      | TBD    |
+| Agent   | TBD   | TBD   | TBD      | TBD    |
+- Base Model：
 
+- 添加benchmark：Gaokao
 
 ## 技术方案
 

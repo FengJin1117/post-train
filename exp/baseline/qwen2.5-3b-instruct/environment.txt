@@ -1,0 +1,21 @@
+generated_at_utc=2026-06-02T17:31:22Z
+model_id=Qwen/Qwen2.5-3B-Instruct
+model_path=/data2/fwh/.cache/modelscope/hub/models/Qwen/Qwen2.5-3B-Instruct
+ms_swift_commit=eb35f330e5754d64fe34358716d80804a280a647
+
+[runtime]
+swift=4.4.0.dev0
+evalscope=1.8.0
+vllm=0.1.dev5699+gde8f43fbe
+torch=2.6.0+cu124
+transformers=4.52.3
+datasets=4.8.4
+modelscope=1.37.0
+
+[evaluation]
+gpu=0, NVIDIA RTX A6000
+benchmark=gsm8k
+samples=1319
+accuracy=0.8469
+correct=1117
+incorrect=202
