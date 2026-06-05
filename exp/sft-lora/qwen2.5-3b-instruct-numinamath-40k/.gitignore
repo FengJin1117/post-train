@@ -1,0 +1,10 @@
+data/
+output/
+eval/
+logs/
+*.log
+*.out
+*.jsonl
+*.pt
+*.pth
+*.safetensors
