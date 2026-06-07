@@ -8,9 +8,16 @@ reasoning study, use Qwen2.5/Qwen2.5-Math models and keep experiment outputs und
 
 ## conda environment
 
+训练环境：conda activate ms-swift
+
 vllm 评测场景（benchmark），使用环境：
 `conda activate vllm`
 
+# 工作原则
+
+- 实验请在：`exp/*/`下进行，比如`exp/sft/`，并在其中记录训练命令、配置文件、日志和结果等。
+- 长期训练任务，请开tmux。避免shell中途退出。
+- 实验结果，只有经过允许，才输出到：`./RESULTS.md`。这里只放最终论文表格展示的数据，不放细节过程信息。
 
 ## Relevant Paths
 

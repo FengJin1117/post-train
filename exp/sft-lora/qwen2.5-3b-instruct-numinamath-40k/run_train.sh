@@ -63,13 +63,13 @@ swift sft \
   --val_dataset "$DATA_DIR/val.jsonl" \
   --torch_dtype bfloat16 \
   --num_train_epochs 2 \
-  --per_device_train_batch_size 2 \
-  --per_device_eval_batch_size 1 \
+  --per_device_train_batch_size 4 \
+  --per_device_eval_batch_size 2 \
   --learning_rate 1e-4 \
   --lora_rank 16 \
   --lora_alpha 32 \
   --target_modules all-linear \
-  --gradient_accumulation_steps 8 \
+  --gradient_accumulation_steps 4 \
   --eval_steps 250 \
   --save_steps 500 \
   --save_total_limit 3 \

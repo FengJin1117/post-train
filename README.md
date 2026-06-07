@@ -19,16 +19,13 @@
 | GRPO       |  TBD  |     TBD  |   TBD  |   TBD  |
 | DAPO       |  TBD  |     TBD  |   TBD  |   TBD  |
 | Agent   | TBD   | TBD   | TBD      | TBD    |
-- Base Model： [Qwen2.5-3B-Instruct](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct)
 
-- 添加benchmark：Gaokao
 
 ## 技术方案
 
 ### 模型
 
-* Qwen2.5-7B
-* Qwen2.5-Math-7B
+*  [Qwen2.5-3B-Instruct](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct)
 
 ### 后训练方法
 
@@ -42,15 +39,13 @@
 * MS-Swift
 * Transformers
 * DeepSpeed
+* vLLM
 
 ### 评测数据集
 
 * GSM8K
 * MATH
 
-## 项目收获
+## 实验发现
 
-* 理解并复现主流 LLM 后训练流程；
-* 掌握 SFT、DPO、GRPO 等算法的训练与评测方法；
-* 熟悉 MS-Swift、DeepSpeed 等大模型训练框架；
-* 具备从数据构建、模型训练到 Benchmark 评测的完整实验经验。
+

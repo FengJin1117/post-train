@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI-MO/NuminaMath-1.5 数据集分析</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #5b667a;
+      --line: #d8dde7;
+      --panel: #f6f8fb;
+      --accent: #1f6feb;
+      --good: #1a7f37;
+      --warn: #9a6700;
+      --bad: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.62;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    header {
+      padding: 40px 28px 28px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.25;
+      margin: 0 0 12px;
+    }
+
+    h1 {
+      max-width: 1120px;
+      margin: 0 auto 10px;
+      font-size: 32px;
+    }
+
+    header p {
+      max-width: 1120px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    h2 {
+      margin-top: 34px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 22px;
+    }
+
+    h3 {
+      margin-top: 22px;
+      font-size: 17px;
+    }
+
+    p { margin: 8px 0 14px; }
+
+    a { color: var(--accent); }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 20px 0 26px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .metric .value {
+      margin-top: 4px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .note {
+      border-left: 4px solid var(--accent);
+      background: #f0f6ff;
+      padding: 12px 14px;
+      margin: 16px 0;
+    }
+
+    .verdict {
+      border-left-color: var(--good);
+      background: #eef8f1;
+    }
+
+    .risk {
+      border-left-color: var(--warn);
+      background: #fff8e6;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 22px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: var(--panel);
+      font-weight: 650;
+    }
+
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    ul { padding-left: 22px; }
+
+    li { margin: 6px 0; }
+
+    code {
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: #eef1f5;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      white-space: pre-wrap;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfe;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+    }
+
+    .sample {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      margin: 14px 0;
+      background: #fff;
+    }
+
+    .sample dl {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 6px 12px;
+      margin: 0 0 10px;
+    }
+
+    .sample dt {
+      color: var(--muted);
+      font-weight: 650;
+    }
+
+    .sample dd { margin: 0; }
+
+    .tag {
+      display: inline-block;
+      margin: 2px 4px 2px 0;
+      padding: 2px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel);
+      font-size: 12px;
+    }
+
+    .ok { color: var(--good); font-weight: 650; }
+    .warn-text { color: var(--warn); font-weight: 650; }
+    .bad-text { color: var(--bad); font-weight: 650; }
+
+    footer {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 10px 28px 36px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 860px) {
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      main, header { padding-left: 18px; padding-right: 18px; }
+      h1 { font-size: 26px; }
+    }
+
+    @media (max-width: 560px) {
+      .summary { grid-template-columns: 1fr; }
+      .sample dl { grid-template-columns: 1fr; }
+      table { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AI-MO/NuminaMath-1.5 数据集分析</h1>
+    <p>面向 Qwen2.5-3B-Instruct 数学后训练的训练集候选评估。分析日期：2026-06-05 UTC。</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>数据集概览</h2>
+      <div class="summary">
+        <div class="metric">
+          <div class="label">总样本数</div>
+          <div class="value">896,215</div>
+        </div>
+        <div class="metric">
+          <div class="label">Split / Config</div>
+          <div class="value">train / default</div>
+        </div>
+        <div class="metric">
+          <div class="label">格式</div>
+          <div class="value">Parquet x3</div>
+        </div>
+        <div class="metric">
+          <div class="label">License</div>
+          <div class="value">Apache-2.0</div>
+        </div>
+      </div>
+
+      <table>
+        <tbody>
+          <tr>
+            <th>数据集</th>
+            <td><a href="https://huggingface.co/datasets/AI-MO/NuminaMath-1.5">AI-MO/NuminaMath-1.5</a></td>
+          </tr>
+          <tr>
+            <th>Hugging Face revision</th>
+            <td><code>1b05109f9e5c1ad06c0663519502416c30b300f8</code>，最后修改时间 2026-01-29 11:00:49 UTC</td>
+          </tr>
+          <tr>
+            <th>ms-swift 注册</th>
+            <td><code>ms-swift/swift/dataset/data/dataset_info.json</code> 已注册 <code>ms_dataset_id</code> 与 <code>hf_dataset_id</code> 为 <code>AI-MO/NuminaMath-1.5</code>，标签为 <code>grpo</code>、<code>math</code>。</td>
+          </tr>
+          <tr>
+            <th>数据集说明</th>
+            <td>官方数据集卡描述其为约 90 万条竞赛级数学题的高质量 post-training 数据，每条解答以 Chain-of-Thought 形式组织，来源覆盖中国高中数学练习、美国及国际数学奥赛题、线上试卷 PDF 与数学论坛。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note verdict">
+        <strong>简要判断：</strong>适合作为数学后训练候选集，但不建议不加过滤地全量直接 SFT。推荐先用 <code>problem_is_valid=Yes</code> 且 <code>solution_is_valid=Yes</code> 的 819,033 条作为主池，再按任务选择 word-problem、proof、MCQ 和来源配比。
+      </div>
+    </section>
+
+    <section>
+      <h2>字段与样例</h2>
+
+      <h3>字段结构</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>字段</th>
+            <th>类型</th>
+            <th>含义</th>
+            <th class="num">缺失/空值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>problem</code></td><td>string</td><td>题目文本。</td><td class="num">空字符串 1</td></tr>
+          <tr><td><code>solution</code></td><td>string</td><td>CoT 风格参考解答，可用于 SFT 或 reward/verifier 参考。</td><td class="num">缺失 32,428；空字符串 202</td></tr>
+          <tr><td><code>answer</code></td><td>string</td><td>最终答案；非数值输出会出现 <code>proof</code>、<code>notfound</code> 等特殊值。</td><td class="num">缺失 51,408；空字符串 3,352</td></tr>
+          <tr><td><code>problem_type</code></td><td>string</td><td>数学领域，如 Algebra、Geometry、Number Theory。</td><td class="num"><code>NaN</code> 5,216</td></tr>
+          <tr><td><code>question_type</code></td><td>string</td><td>题型：math-word-problem、MCQ、proof、other。</td><td class="num"><code>NaN</code> 5,216</td></tr>
+          <tr><td><code>problem_is_valid</code></td><td>string</td><td>题目有效性标签。</td><td class="num"><code>NaN</code> 5,219</td></tr>
+          <tr><td><code>solution_is_valid</code></td><td>string</td><td>解答有效性标签。</td><td class="num"><code>NaN</code> 5,227</td></tr>
+          <tr><td><code>source</code></td><td>string</td><td>数据来源。</td><td class="num">0</td></tr>
+          <tr><td><code>synthetic</code></td><td>bool</td><td>是否为合成数据。</td><td class="num">0</td></tr>
+        </tbody>
+      </table>
+
+      <h3>代表性样例</h3>
+
+      <article class="sample">
+        <dl>
+          <dt>来源/类型</dt>
+          <dd><span class="tag">olympiads</span><span class="tag">proof</span><span class="tag">Algebra</span><span class="tag">solution_is_valid=Incomplete</span></dd>
+          <dt>题目</dt>
+          <dd><pre>Problem 2. Let $a, b$ be two distinct real numbers and let $c$ be a positive real number such that
+
+$$
+a^{4}-2019 a=b^{4}-2019 b=c .
+$$
+
+Prove that $-\sqrt{c}&lt;a b&lt;0$.</pre></dd>
+          <dt>答案</dt>
+          <dd><code>proof</code></dd>
+          <dt>观察</dt>
+          <dd>证明题对提升奥赛推理有价值，但该样例的解答被标为 <span class="warn-text">Incomplete</span>，说明 SFT 前必须过滤或人工抽检。</dd>
+        </dl>
+      </article>
+
+      <article class="sample">
+        <dl>
+          <dt>来源/类型</dt>
+          <dd><span class="tag">cn_k12</span><span class="tag">math-word-problem</span><span class="tag">Algebra</span><span class="tag">valid</span></dd>
+          <dt>题目</dt>
+          <dd><pre>Given the functions $f(x) = \log_a(1+x)$ and $g(x) = \log_a(1-x)$, where $a&gt;0$ and $a \neq 1$.
+1. Find the domain of the function $f(x) - g(x)$.
+2. Determine the parity of the function $f(x) - g(x)$.
+3. Find the range of $x$ for which $f(x) - g(x) &gt; 0$.</pre></dd>
+          <dt>答案</dt>
+          <dd><code>(-1, 0)</code></dd>
+          <dt>观察</dt>
+          <dd>适合 SFT，但此类多问问题的 <code>answer</code> 可能只覆盖最后一问；若用于 GRPO accuracy reward，需要确认 reward 抽取逻辑。</dd>
+        </dl>
+      </article>
+
+      <article class="sample">
+        <dl>
+          <dt>来源/类型</dt>
+          <dd><span class="tag">orca_math</span><span class="tag">math-word-problem</span><span class="tag">synthetic=true</span><span class="tag">valid</span></dd>
+          <dt>题目</dt>
+          <dd><pre>Julian is writing a comic book. On average, his story has 280 frames per page. In his 25-page book, 10 pages have 305 frames, 7 pages have 250 frames, and the remaining pages have the average number of frames. How many frames will there be in total in his comic book?</pre></dd>
+          <dt>答案</dt>
+          <dd><code>7040</code></dd>
+          <dt>观察</dt>
+          <dd>与 GSM8K 风格接近，适合小模型学习稳定解题格式；但难度偏低，过量混入可能稀释 AIME/MATH-500 所需的高难推理。</dd>
+        </dl>
+      </article>
+
+      <article class="sample">
+        <dl>
+          <dt>来源/类型</dt>
+          <dd><span class="tag">synthetic_math</span><span class="tag">math-word-problem</span><span class="tag">synthetic=true</span><span class="tag">valid</span></dd>
+          <dt>题目</dt>
+          <dd><pre>Consider the terms of an arithmetic sequence: $-\frac{1}{3}, y+2, 4y, \ldots$. Solve for $y$.</pre></dd>
+          <dt>答案</dt>
+          <dd><code>\frac{13}{6}</code></dd>
+          <dt>观察</dt>
+          <dd>合成题具备标准答案和 boxed 解答，利于格式学习；训练时建议设上限或采样权重，避免模型过拟合单一模板。</dd>
+        </dl>
+      </article>
+    </section>
+
+    <section>
+      <h2>规模与分布</h2>
+
+      <h3>文本长度统计</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>字段</th>
+            <th class="num">平均字符数</th>
+            <th class="num">P50</th>
+            <th class="num">P90</th>
+            <th class="num">P95</th>
+            <th class="num">P99</th>
+            <th class="num">最大值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>problem</code></td><td class="num">262.3</td><td class="num">216</td><td class="num">458</td><td class="num">578</td><td class="num">965</td><td class="num">45,303</td></tr>
+          <tr><td><code>solution</code></td><td class="num">930.1</td><td class="num">784</td><td class="num">1,747</td><td class="num">2,221</td><td class="num">3,605</td><td class="num">26,844</td></tr>
+          <tr><td><code>answer</code></td><td class="num">8.6</td><td class="num">4</td><td class="num">20</td><td class="num">33</td><td class="num">70</td><td class="num">575</td></tr>
+        </tbody>
+      </table>
+
+      <h3>来源分布</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>source</th>
+            <th class="num">样本数</th>
+            <th class="num">占比</th>
+            <th>训练含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>cn_k12</td><td class="num">268,819</td><td class="num">30.00%</td><td>中文高中练习来源，覆盖基础到中等数学题；对 GAOKAO 相关性较高。</td></tr>
+          <tr><td>olympiads</td><td class="num">197,084</td><td class="num">21.99%</td><td>证明和竞赛题较多，对 MATH-500/AIME 风格推理有价值，但需注意图片和解答质量。</td></tr>
+          <tr><td>orca_math</td><td class="num">151,934</td><td class="num">16.95%</td><td>GSM8K 类 word problem 较多，利于稳定格式与算术推理。</td></tr>
+          <tr><td>synthetic_math</td><td class="num">148,712</td><td class="num">16.59%</td><td>合成数据量大，适合补充覆盖，但建议限权重。</td></tr>
+          <tr><td>aops_forum</td><td class="num">67,841</td><td class="num">7.57%</td><td>论坛竞赛题，难度和噪声都可能更高。</td></tr>
+          <tr><td>cn_contest</td><td class="num">29,944</td><td class="num">3.34%</td><td>竞赛来源，适合增强中高难中文数学。</td></tr>
+          <tr><td>其他</td><td class="num">31,879</td><td class="num">3.56%</td><td>包括 metamath、inequalities、amc_aime、number_theory、olympiads_ref。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>题型与领域分布</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>Top 分布</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>question_type</td>
+            <td>math-word-problem 631,522；MCQ 146,449；proof 110,998；NaN 5,216；other 2,030。</td>
+          </tr>
+          <tr>
+            <td>problem_type</td>
+            <td>Algebra 422,915；Geometry 183,796；Number Theory 91,383；Combinatorics 73,643；Inequalities 41,741；Logic and Puzzles 37,911；Calculus 26,965；Other 12,645；NaN 5,216。</td>
+          </tr>
+          <tr>
+            <td>synthetic</td>
+            <td>False 584,555；True 311,660。合成数据约 34.77%。</td>
+          </tr>
+          <tr>
+            <td>answer 特殊值</td>
+            <td><code>proof</code> 81,042；<code>notfound</code> 10,850；其他最终答案 804,323。粗略含数字答案 630,963。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>过滤后可用规模</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>过滤条件</th>
+            <th class="num">剩余样本</th>
+            <th>用途判断</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>problem_is_valid=Yes</code> 且 <code>solution_is_valid=Yes</code></td><td class="num">819,033</td><td>推荐主训练池。</td></tr>
+          <tr><td>主训练池且有非空 solution</td><td class="num">786,439</td><td>SFT 更稳妥的基础池。</td></tr>
+          <tr><td>主训练池且不含图片链接</td><td class="num">794,318</td><td>适合纯文本模型训练，避免图像缺失导致题意不完整。</td></tr>
+          <tr><td>主训练池中的 math-word-problem 且有可用最终答案</td><td class="num">549,673</td><td>适合 GRPO/DAPO accuracy reward 或答案校验。</td></tr>
+          <tr><td>非图片、非 <code>notfound</code>、有答案与 solution</td><td class="num">738,822</td><td>推荐作为首轮 LoRA/Full SFT 的候选池。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>质量风险</h2>
+
+      <div class="note risk">
+        <strong>主要风险：</strong>数据量足够大，但存在答案不可验证、解答不完整、图片依赖、合成数据占比较高和潜在 benchmark 污染等问题。训练前需要过滤和分层采样。
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>风险项</th>
+            <th class="num">规模</th>
+            <th>处理建议</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>solution_is_valid=Incomplete</code></td><td class="num">32,522</td><td>默认排除；若用于 hard negative 或纠错训练，需要单独标注。</td></tr>
+          <tr><td><code>solution_is_valid=Problem not solved</code></td><td class="num">13,446</td><td>排除 SFT；也不适合作为 GRPO 参考 solution。</td></tr>
+          <tr><td><code>problem_is_valid</code> 非 Yes</td><td class="num">36,859</td><td>排除或人工抽检。</td></tr>
+          <tr><td><code>answer</code> 缺失或空字符串</td><td class="num">54,760</td><td>不能直接用于 accuracy reward；SFT 可保留但要降低权重。</td></tr>
+          <tr><td>含 Markdown/HTML 图片链接</td><td class="num">35,211</td><td>纯文本 Qwen2.5-3B-Instruct 训练应排除，除非补齐图像描述。</td></tr>
+          <tr><td><code>synthetic=true</code></td><td class="num">311,660</td><td>建议采样上限或与非合成数据分层混合，避免模板化。</td></tr>
+        </tbody>
+      </table>
+
+      <p>额外注意：本地样例中可见个别解答存在排版或抽取异常，例如缺失不等号区间、公式片段拼接错误。即使有效性标签为 Yes，也建议训练前抽检高权重来源，特别是 <code>cn_k12</code>、<code>olympiads</code>、<code>aops_forum</code>。</p>
+    </section>
+
+    <section>
+      <h2>训练适配建议</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>目标方法</th>
+            <th>适配性</th>
+            <th>建议用法</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>LoRA-SFT / Full SFT</td>
+            <td><span class="ok">适合，需过滤</span></td>
+            <td>用 <code>problem + solution</code> 构造成 messages，优先取 738,822 条非图片、非 notfound、有答案和 solution 的样本；控制合成数据比例，避免覆盖基模已有通用能力。</td>
+          </tr>
+          <tr>
+            <td>GRPO / DAPO</td>
+            <td><span class="ok">很适合</span></td>
+            <td>主用 549,673 条可验证 word problem，保留 <code>solution</code> 和 <code>answer</code> 作为 reward/reference 信息；配合 <code>accuracy</code> 与 <code>format</code> reward。</td>
+          </tr>
+          <tr>
+            <td>DPO</td>
+            <td><span class="warn-text">需要额外构造</span></td>
+            <td>原数据没有 rejected response，不能直接作为 DPO 数据集；可从模型采样错误解构造 preference pairs。</td>
+          </tr>
+          <tr>
+            <td>PPO</td>
+            <td><span class="warn-text">可做 prompt 池</span></td>
+            <td>可使用 prompt-only 题目池，但 reward 需要另行定义；可验证答案题优先。</td>
+          </tr>
+          <tr>
+            <td>Agent</td>
+            <td><span class="warn-text">不是首选</span></td>
+            <td>数据不含工具调用轨迹，除非改造成解题工具调用或代码执行环境，否则对 Agent benchmark 帮助有限。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Benchmark 相关性</h3>
+      <ul>
+        <li><strong>GSM8K：</strong><code>orca_math</code>、<code>synthetic_math</code> 和基础 word problem 很相关，预计能提升格式稳定性与中低难算术题表现；当前基线 84.69 已不低，需防止过训造成退化。</li>
+        <li><strong>MATH-500：</strong><code>olympiads</code>、<code>aops_forum</code>、<code>number_theory</code>、<code>inequalities</code> 更相关，建议提高竞赛来源采样权重。</li>
+        <li><strong>GAOKAO：</strong><code>cn_k12</code> 和 <code>cn_contest</code> 有明显相关性，但数据文本主要是英文；若评测题为中文，仍需补充中文题面或中文 SFT 数据。</li>
+        <li><strong>AIME25：</strong><code>amc_aime</code> 仅 5,872 条，直接提升可能有限；建议作为高权重小池，配合 olympiad/AoPS 难题训练，并做污染检查。</li>
+      </ul>
+
+      <h3>推荐首轮训练池</h3>
+      <p>建议首轮不要直接吃全量 896,215 条，而是构建两个子集：</p>
+      <ul>
+        <li><strong>SFT 子集：</strong>从 738,822 条非图片、非 <code>notfound</code>、有答案和有效 solution 的样本中采样，限制 <code>synthetic=true</code> 比例，按 benchmark 目标提高 <code>olympiads</code>、<code>aops_forum</code>、<code>cn_contest</code>、<code>amc_aime</code> 权重。</li>
+        <li><strong>GRPO/DAPO 子集：</strong>优先使用 549,673 条可验证 word problem；训练前检查答案抽取格式，让 reward 可以稳定识别整数、分数、选项和 LaTeX 表达式。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>最终结论</h2>
+      <div class="note verdict">
+        <p><strong>结论：AI-MO/NuminaMath-1.5 适合作为 Qwen2.5-3B-Instruct 数学后训练的数据集候选，并且更适合作为经过过滤和分层采样后的训练池，而不是原样全量训练集。</strong></p>
+        <p>它的优势是规模大、覆盖广、已有答案和题型元数据、ms-swift 已注册，能直接服务 SFT 与 GRPO/DAPO。对 GSM8K 和 MATH-500 的相关性最明确；对 GAOKAO 和 AIME25 也有价值，但需要更细的语言、难度和污染控制。</p>
+        <p>执行上，首轮建议用过滤后的 SFT 子集建立解题格式，再用可验证答案子集做 GRPO/DAPO。若目标是 AIME25，必须额外提高高难竞赛题权重，并避免低难合成题占比过高。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    本报告基于 Hugging Face dataset metadata、NuminaMath-1.5 数据集卡、ms-swift 注册文件，以及本地 parquet 全量扫描结果生成。原始数据仅下载到本机 Hugging Face cache，未复制进仓库。
+  </footer>
+</body>
+</html>
