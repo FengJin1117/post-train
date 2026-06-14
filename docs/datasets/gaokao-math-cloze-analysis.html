@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GaoKao Math Cloze 数据分析</title>
+<style>
+:root{--ink:#172033;--muted:#5b667a;--line:#d8dde7;--panel:#f6f8fb;--accent:#1f6feb;--good:#1a7f37;--warn:#9a6700}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","Microsoft YaHei",sans-serif;line-height:1.62}
+header{padding:40px 28px 28px;border-bottom:1px solid var(--line);background:var(--panel)}header>* ,main,footer{max-width:1120px;margin-left:auto;margin-right:auto}
+h1{margin-top:0;margin-bottom:8px;font-size:31px}header p{color:var(--muted);margin-top:0}main{padding:28px}footer{padding:10px 28px 36px;color:var(--muted);font-size:13px}
+h2{margin:34px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);font-size:22px}h3{font-size:17px;margin-top:22px}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}.metric{border:1px solid var(--line);border-radius:8px;padding:14px}.label{color:var(--muted);font-size:13px}.value{font-size:22px;font-weight:700}
+.note{margin:16px 0;padding:12px 14px;border-left:4px solid var(--accent);background:#f0f6ff}.risk{border-left-color:var(--warn);background:#fff8e6}.good{border-left-color:var(--good);background:#eef8f1}
+table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:14px}th,td{padding:8px 10px;border:1px solid var(--line);text-align:left}th{background:var(--panel)}.num{text-align:right;font-variant-numeric:tabular-nums}
+code{background:#eef1f5;padding:1px 5px;border-radius:4px}.small{font-size:13px;color:var(--muted)}li{margin:6px 0}@media(max-width:800px){.summary{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.summary{grid-template-columns:1fr}main,header{padding-left:18px;padding-right:18px}}
+</style></head><body>
+<header><h1>GaoKao Math Cloze 数据分析</h1><p>独立 benchmark：高考数学填空题。使用 Qwen2.5-Math-1.5B tokenizer；分析日期：2026-06-13 UTC。</p></header>
+<main>
+<h2>定位与结论</h2>
+<div class="note good"><strong>适合作为 4k 数学推理 benchmark。</strong>共 118 道无选项填空题，题面短、覆盖广、答案确定，可自动评分。它与 GaoKao Math QA 必须独立报告，不能合并准确率。</div>
+<div class="summary">
+ <div class="metric"><div class="label">题目数</div><div class="value">118</div><div class="small">去重后 116</div></div>
+ <div class="metric"><div class="label">题面 P50</div><div class="value">61 tokens</div><div class="small">最大 293</div></div>
+ <div class="metric"><div class="label">双空题</div><div class="value">16</div><div class="small">13.6%</div></div>
+ <div class="metric"><div class="label">年份范围</div><div class="value">2007–2022</div><div class="small">43 个试卷名称</div></div>
+</div>
+<p>标准数据采用 AGIEval v1.1 / Qwen2.5-Math 中逐字节一致的 <code>gaokao_math_cloze</code>。它源于高考数学填空题，字段为 <code>question</code> + <code>answer</code>，无选项。</p>
+<div class="note risk"><strong>命名说明：</strong>原始 GAOKAO-Bench 将数学填空题放在 <code>Subjective_Questions</code>；这里的 “objective” 指评分方式客观、可规则判定，不表示它是选择题。</div>
+
+<h2>长度与 4k 可用性</h2>
+<table><thead><tr><th>文本口径</th><th class="num">平均</th><th class="num">P50</th><th class="num">P90</th><th class="num">P95</th><th class="num">最大</th></tr></thead>
+<tbody><tr><td>原始题面 tokens</td><td class="num">70.6</td><td class="num">61</td><td class="num">116</td><td class="num">138</td><td class="num">293</td></tr>
+<tr><td>推荐 chat prompt tokens</td><td class="num">136.6</td><td class="num">127</td><td class="num">182</td><td class="num">204</td><td class="num">359</td></tr></tbody></table>
+<p>所有题面都远小于 4096。对 Qwen2.5-Math-1.5B 使用 <code>max_tokens=3072</code> 时，输入侧没有长度风险。</p>
+
+<h2>答案与评分复杂度</h2>
+<table><thead><tr><th>答案类型</th><th class="num">数量</th><th class="num">占比</th><th>评分要求</th></tr></thead><tbody>
+<tr><td>纯数值</td><td class="num">44</td><td class="num">37.3%</td><td>数值等价</td></tr>
+<tr><td>符号表达式</td><td class="num">40</td><td class="num">33.9%</td><td>LaTeX / 符号等价</td></tr>
+<tr><td>双空答案</td><td class="num">16</td><td class="num">13.6%</td><td>按顺序拆分后逐项判定</td></tr>
+<tr><td>区间或坐标</td><td class="num">9</td><td class="num">7.6%</td><td>区间端点与开闭性必须一致</td></tr>
+<tr><td>方程或等式</td><td class="num">7</td><td class="num">5.9%</td><td>符号等价</td></tr>
+<tr><td>命题序号</td><td class="num">2</td><td class="num">1.7%</td><td>序号集合匹配</td></tr>
+</tbody></table>
+<div class="note risk">不能使用 BLEU/ROUGE，也不应只做原始字符串 exact match。16 道双空题应要求模型用分号分隔；其中 1 道是中文自由文本条件题，需要单独的人工/规则别名审计。</div>
+
+<h2>内容分布</h2>
+<p class="small">以下为关键词启发式、多标签统计，用于理解覆盖面，不是官方知识点标注。</p>
+<table><thead><tr><th>知识点信号</th><th class="num">数量</th><th class="num">占比</th><th>知识点信号</th><th class="num">数量</th><th class="num">占比</th></tr></thead><tbody>
+<tr><td>函数/导数</td><td class="num">29</td><td class="num">24.6%</td><td>解析几何</td><td class="num">27</td><td class="num">22.9%</td></tr>
+<tr><td>三角</td><td class="num">20</td><td class="num">16.9%</td><td>排列组合/二项式</td><td class="num">15</td><td class="num">12.7%</td></tr>
+<tr><td>向量</td><td class="num">13</td><td class="num">11.0%</td><td>数列</td><td class="num">12</td><td class="num">10.2%</td></tr>
+<tr><td>概率统计</td><td class="num">10</td><td class="num">8.5%</td><td>集合/不等式</td><td class="num">7</td><td class="num">5.9%</td></tr>
+<tr><td>立体几何</td><td class="num">7</td><td class="num">5.9%</td><td>复数</td><td class="num">4</td><td class="num">3.4%</td></tr>
+</tbody></table>
+<p>2020–2022 年题目共 58 道（49.2%），数据明显偏向较新高考题，但仍覆盖 2007–2022。</p>
+
+<h2>数据质量与报告规范</h2>
+<ul>
+<li>标准集：118 题；存在 2 条重复行，标准可比结果仍报告 <strong>118 题准确率</strong>。</li>
+<li>建议同时报告去重后的 <strong>116 题准确率</strong>，用于内部审计，但不要替代标准分数。</li>
+<li>未发现明确依赖缺失图片的题目；“图象/图像”出现于函数描述，不代表需要视觉输入。</li>
+<li>推荐主指标：数学等价 exact accuracy；双空题必须全部正确才计 1 分。</li>
+</ul>
+
+<h2>固定来源</h2>
+<ul>
+<li>GAOKAO-Bench commit：<code>6dbb24f8d8439041e5431c4c184a582182a6ce9c</code></li>
+<li>AGIEval commit：<code>84ab72d94318290aad2e4ec820d535a95a1f7552</code></li>
+<li>Qwen2.5-Math commit：<code>a45202bd16f1ec06f433442dc1152d0074773465</code></li>
+<li>数据 SHA-256：<code>088675c147794970a3ed25c7147a3bbc59715d6813837d5f483f46dcb1b5008d</code></li>
+</ul>
+</main><footer>本报告仅分析 GaoKao Math Cloze；不包含 GaoKao Math QA。</footer></body></html>

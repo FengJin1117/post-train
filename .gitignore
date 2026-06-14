@@ -132,7 +132,10 @@ outputs/
 wandb/
 swanlog/
 *.out
-benchmarks/
+/benchmarks/*
+!/benchmarks/gaokao_math/
+!/benchmarks/gaokao_math/**
+/benchmarks/gaokao_math/**/__pycache__/
 eval_output/
 eval_outputs/
 vlmeval/
@@ -156,3 +159,13 @@ ast_index_file.py
 
 # Baseline evaluation artifacts
 /exp/baseline/**/raw/
+
+/exp/dataset-analysis
+
+# External reproduction references
+/references/s1-repo/
+
+# Full-SFT experiment artifacts
+/exp/sft-full/**/data/
+/exp/sft-full/**/output/
+/exp/sft-full/**/eval/

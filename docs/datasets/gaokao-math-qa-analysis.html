@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GaoKao Math QA 数据分析</title>
+<style>
+:root{--ink:#172033;--muted:#5b667a;--line:#d8dde7;--panel:#f6f8fb;--accent:#1f6feb;--good:#1a7f37;--warn:#9a6700}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","Microsoft YaHei",sans-serif;line-height:1.62}
+header{padding:40px 28px 28px;border-bottom:1px solid var(--line);background:var(--panel)}header>* ,main,footer{max-width:1120px;margin-left:auto;margin-right:auto}
+h1{margin-top:0;margin-bottom:8px;font-size:31px}header p{color:var(--muted);margin-top:0}main{padding:28px}footer{padding:10px 28px 36px;color:var(--muted);font-size:13px}
+h2{margin:34px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);font-size:22px}.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}.metric{border:1px solid var(--line);border-radius:8px;padding:14px}.label{color:var(--muted);font-size:13px}.value{font-size:22px;font-weight:700}
+.note{margin:16px 0;padding:12px 14px;border-left:4px solid var(--accent);background:#f0f6ff}.risk{border-left-color:var(--warn);background:#fff8e6}.good{border-left-color:var(--good);background:#eef8f1}
+table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:14px}th,td{padding:8px 10px;border:1px solid var(--line);text-align:left}th{background:var(--panel)}.num{text-align:right;font-variant-numeric:tabular-nums}code{background:#eef1f5;padding:1px 5px;border-radius:4px}.small{font-size:13px;color:var(--muted)}li{margin:6px 0}@media(max-width:800px){.summary{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.summary{grid-template-columns:1fr}main,header{padding-left:18px;padding-right:18px}}
+</style></head><body>
+<header><h1>GaoKao Math QA 数据分析</h1><p>独立 benchmark：高考数学选择题。使用 Qwen2.5-Math-1.5B tokenizer；分析日期：2026-06-13 UTC。</p></header>
+<main>
+<h2>定位与结论</h2>
+<div class="note good"><strong>适合作为 4k 数学推理选择题 benchmark。</strong>共 351 道四选一/多选题，输入很短，可用选项集合准确率自动评分。它与 GaoKao Math Cloze 必须独立报告。</div>
+<div class="summary">
+ <div class="metric"><div class="label">题目数</div><div class="value">351</div><div class="small">去重后 348</div></div>
+ <div class="metric"><div class="label">单选 / 多选</div><div class="value">344 / 7</div><div class="small">均有 A–D 四个选项</div></div>
+ <div class="metric"><div class="label">题面+选项 P50</div><div class="value">100 tokens</div><div class="small">最大 332</div></div>
+ <div class="metric"><div class="label">年份范围</div><div class="value">2008–2022</div><div class="small">44 个试卷名称</div></div>
+</div>
+<p>标准数据采用 AGIEval v1.1 的 <code>gaokao-mathqa</code>。Qwen2.5-Math 中的 <code>gaokao_math_qa</code> 题目与标签对应一致，仅将选项从列表规范化为字典。</p>
+<div class="note risk"><strong>关键风险：</strong>数据中有 7 道多选题。默认“取最后一个选项字母”的单选评分会错误评估这些题；应将模型答案规范化为 A–D 集合并做完全匹配。</div>
+
+<h2>长度与 4k 可用性</h2>
+<table><thead><tr><th>文本口径</th><th class="num">平均</th><th class="num">P50</th><th class="num">P90</th><th class="num">P95</th><th class="num">最大</th></tr></thead><tbody>
+<tr><td>仅题面 tokens</td><td class="num">65.9</td><td class="num">61</td><td class="num">102</td><td class="num">121</td><td class="num">215</td></tr>
+<tr><td>题面 + 四个选项</td><td class="num">109.6</td><td class="num">100</td><td class="num">167</td><td class="num">189</td><td class="num">332</td></tr>
+<tr><td>推荐 chat prompt</td><td class="num">160.6</td><td class="num">151</td><td class="num">218</td><td class="num">240</td><td class="num">383</td></tr>
+</tbody></table>
+<p>所有输入都远小于 4096，context 不是限制。为评估推理能力，建议允许 CoT，但最终答案必须单独输出选项字母集合。</p>
+
+<h2>选项与评分</h2>
+<table><thead><tr><th>标签类型</th><th class="num">数量</th><th class="num">占比</th><th>评分</th></tr></thead><tbody>
+<tr><td>单选</td><td class="num">344</td><td class="num">98.0%</td><td>预测字母等于标签</td></tr>
+<tr><td>多选</td><td class="num">7</td><td class="num">2.0%</td><td>预测选项集合与标签集合完全相等</td></tr>
+</tbody></table>
+<p>单选标签分布较均衡：A 85、B 87、C 92、D 80。多选标签包括 AC、AD、ACD、ABD、BCD、CD；随机单选基线约为 25%，但无法正确覆盖多选题。</p>
+<div class="note risk">不要直接使用只支持单选的 <code>general_mcq</code> 默认评分器，除非先扩展为多选集合评分。标准主指标应为 351 题逐题 exact-set accuracy，每题等权。</div>
+
+<h2>内容分布</h2>
+<p class="small">以下为关键词启发式、多标签统计，用于理解覆盖面，不是官方知识点标注。</p>
+<table><thead><tr><th>知识点信号</th><th class="num">数量</th><th class="num">占比</th><th>知识点信号</th><th class="num">数量</th><th class="num">占比</th></tr></thead><tbody>
+<tr><td>解析几何</td><td class="num">76</td><td class="num">21.7%</td><td>集合/不等式</td><td class="num">60</td><td class="num">17.1%</td></tr>
+<tr><td>三角</td><td class="num">59</td><td class="num">16.8%</td><td>函数/导数</td><td class="num">56</td><td class="num">16.0%</td></tr>
+<tr><td>数列</td><td class="num">39</td><td class="num">11.1%</td><td>立体几何</td><td class="num">26</td><td class="num">7.4%</td></tr>
+<tr><td>复数</td><td class="num">23</td><td class="num">6.6%</td><td>向量</td><td class="num">20</td><td class="num">5.7%</td></tr>
+<tr><td>概率统计</td><td class="num">19</td><td class="num">5.4%</td><td>排列组合/二项式</td><td class="num">13</td><td class="num">3.7%</td></tr>
+</tbody></table>
+<p>2020–2022 年题目共 142 道（40.5%）。覆盖面比 Cloze 更大，尤其适合考察基础概念、快速推理和选项辨析。</p>
+
+<h2>数据质量与报告规范</h2>
+<ul>
+<li>标准集：351 题；存在 3 条重复行，标准可比结果仍报告 <strong>351 题准确率</strong>。</li>
+<li>建议附加报告去重后的 <strong>348 题准确率</strong>，但不要替代标准分数。</li>
+<li>未发现明确依赖缺失图片的题目；出现“图象/图像”的题目均有文本数学定义。</li>
+<li>主指标：exact-set accuracy。多选题少选、多选或错选均计 0 分。</li>
+</ul>
+
+<h2>固定来源</h2>
+<ul>
+<li>GAOKAO-Bench commit：<code>6dbb24f8d8439041e5431c4c184a582182a6ce9c</code></li>
+<li>AGIEval commit：<code>84ab72d94318290aad2e4ec820d535a95a1f7552</code></li>
+<li>Qwen2.5-Math commit：<code>a45202bd16f1ec06f433442dc1152d0074773465</code></li>
+<li>AGIEval 数据 SHA-256：<code>d246f12752d121289ef55cbf1bcf954243cefb65d110f71d09358e24065c808f</code></li>
+</ul>
+</main><footer>本报告仅分析 GaoKao Math QA；不包含 GaoKao Math Cloze。</footer></body></html>

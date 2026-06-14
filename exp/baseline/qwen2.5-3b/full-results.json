@@ -1,0 +1,22 @@
+{
+  "gsm8k": {
+    "samples": 1319,
+    "correct": 669,
+    "accuracy": 0.507202,
+    "boxed_rate": 0.970432,
+    "max_token_rate": 0.253222,
+    "non_empty_rate": 1.0,
+    "output_tokens_mean": 2625.51,
+    "output_tokens_median": 397
+  },
+  "math_500": {
+    "samples": 500,
+    "correct": 288,
+    "accuracy": 0.576,
+    "boxed_rate": 0.892,
+    "max_token_rate": 0.044,
+    "non_empty_rate": 1.0,
+    "output_tokens_mean": 859.6,
+    "output_tokens_median": 434.5
+  }
+}

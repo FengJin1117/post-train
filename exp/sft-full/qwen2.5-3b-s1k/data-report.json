@@ -1,0 +1,57 @@
+{
+  "dataset": "simplescaling/s1K",
+  "revision": "278d72baaa2b887a7e76a70a0ae254a5a45536e4",
+  "rows": 1000,
+  "official_render_exact_matches": 1000,
+  "cot_type": {
+    "math": 877,
+    "science": 108,
+    "crossword": 15
+  },
+  "source_type": {
+    "AI-MO/NuminaMath-CoT/aops_forum": 271,
+    "qq8933/AIME_1983_2024": 287,
+    "KbsdJames/Omni-MATH": 71,
+    "TIGER-Lab/TheoremQA/float": 25,
+    "daman1209arora/jeebench/phy": 18,
+    "qfq/openaimath/Algebra": 3,
+    "Hothan/OlympiadBench/Open-ended/Physics": 74,
+    "Idavidrein/gpqa": 88,
+    "Hothan/OlympiadBench/Theorem proof/Math": 2,
+    "daman1209arora/jeebench/chem": 11,
+    "qfq/openaimath/Precalculus": 30,
+    "TIGER-Lab/TheoremQA/bool": 5,
+    "qfq/openaimath/Intermediate Algebra": 32,
+    "qfq/openaimath/Geometry": 8,
+    "0xharib/xword1": 15,
+    "TIGER-Lab/TheoremQA/list of integer": 1,
+    "TIGER-Lab/TheoremQA/integer": 10,
+    "baber/agieval/aqua_rat": 2,
+    "GAIR/OlympicArena/Math": 3,
+    "GAIR/OlympicArena/Astronomy": 4,
+    "AI-MO/NuminaMath-CoT/olympiads": 3,
+    "baber/agieval/math_agieval": 1,
+    "qfq/openaimath/Number Theory": 8,
+    "qfq/openaimath/Prealgebra": 2,
+    "qfq/quant": 1,
+    "daman1209arora/jeebench/math": 9,
+    "AI-MO/NuminaMath-CoT/cn_k12": 1,
+    "OpenDFM/SciEval/chemistry/filling/reagent selection": 3,
+    "qfq/openaimath/Counting & Probability": 2,
+    "qfq/stats_qual": 3,
+    "GAIR/OlympicArena/Chemistry": 1,
+    "Hothan/OlympiadBench/Theorem proof/Physics": 3,
+    "TIGER-Lab/TheoremQA/list of float": 2,
+    "GAIR/OlympicArena/Physics": 1
+  },
+  "lengths": {
+    "min": 712,
+    "median": 5898.0,
+    "mean": 5658.48,
+    "max": 9109
+  },
+  "known_contamination_risk": {
+    "aime24": "s1K contains 287 rows from qq8933/AIME_1983_2024",
+    "scan": "Run contamination.py after EvalScope has cached all benchmark datasets."
+  }
+}

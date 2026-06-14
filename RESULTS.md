@@ -93,3 +93,10 @@ The CUDA 12.4 custom vLLM build can be imported, but its colocate APIs are incom
 - E1 final training metrics: train loss `0.38255`, validation loss `0.45749`
 - Fixed-subset base gate: GSM8K `84.00`, MATH-500 `68.00`
 - Detailed state: `exp/sft-lora/qwen2.5-3b-instruct-numinamath-clean-v2/HANDOFF.md`
+
+## Qwen2.5-3B Base Clean V2 Progress
+
+- Raw base GSM8K/MATH-500 baseline: pending
+- B1: clean-10K, LR `1e-5`, rank-8 attention LoRA, 1 epoch
+- B2: clean-10K, LR `5e-5`, rank-16 all-linear LoRA, 2 epochs
+- Detailed state: `exp/sft-lora/qwen2.5-3b-numinamath-clean-v2/HANDOFF.md`

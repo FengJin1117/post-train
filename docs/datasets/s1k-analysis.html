@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>simplescaling/s1K：Qwen2.5-Math-1.5B 复刻可行性分析</title>
+  <style>
+    :root { --ink:#172033; --muted:#5b667a; --line:#d8dde7; --panel:#f6f8fb;
+      --accent:#1f6feb; --good:#1a7f37; --warn:#9a6700; --bad:#b42318; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
+      "Noto Sans SC","Microsoft YaHei",sans-serif; line-height:1.62; }
+    header { padding:40px 28px 28px; border-bottom:1px solid var(--line); background:var(--panel); }
+    header h1, header p, main, footer { max-width:1120px; margin-left:auto; margin-right:auto; }
+    h1 { margin-top:0; margin-bottom:10px; font-size:31px; line-height:1.25; }
+    header p { margin-top:0; margin-bottom:0; color:var(--muted); }
+    main { padding:28px; } footer { padding:10px 28px 36px; color:var(--muted); font-size:13px; }
+    h2 { margin:35px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--line); font-size:22px; }
+    h3 { margin:23px 0 8px; font-size:17px; }
+    p { margin:8px 0 14px; } a { color:var(--accent); }
+    code { padding:1px 5px; border-radius:4px; background:#eef1f5; font-size:.92em; }
+    .summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:20px 0; }
+    .metric { padding:14px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .metric .label { color:var(--muted); font-size:13px; }
+    .metric .value { margin-top:4px; font-size:22px; font-weight:700; }
+    .metric .sub { margin-top:3px; color:var(--muted); font-size:12px; }
+    .note { margin:16px 0; padding:12px 14px; border-left:4px solid var(--accent); background:#f0f6ff; }
+    .verdict { border-left-color:var(--bad); background:#fff1f0; }
+    .recommend { border-left-color:var(--good); background:#eef8f1; }
+    .risk { border-left-color:var(--warn); background:#fff8e6; }
+    table { width:100%; margin:14px 0 22px; border-collapse:collapse; font-size:14px; }
+    th,td { padding:8px 10px; border:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { background:var(--panel); font-weight:650; } td.num,th.num { text-align:right; font-variant-numeric:tabular-nums; }
+    .bad { color:var(--bad); font-weight:650; } .good { color:var(--good); font-weight:650; }
+    .bar-row { display:grid; grid-template-columns:170px 1fr 85px; gap:10px; align-items:center; margin:9px 0; font-size:14px; }
+    .bar-track { height:15px; overflow:hidden; border-radius:4px; background:#edf0f4; }
+    .bar { height:100%; background:var(--accent); } .bar.badbar { background:#d04a40; }
+    .small { color:var(--muted); font-size:13px; } ul,ol { padding-left:22px; } li { margin:6px 0; }
+    @media(max-width:860px){.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.bar-row{grid-template-columns:120px 1fr 70px}}
+    @media(max-width:560px){.summary{grid-template-columns:1fr}main,header{padding-left:18px;padding-right:18px}table{font-size:12px}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>simplescaling/s1K：Qwen2.5-Math-1.5B 复刻可行性分析</h1>
+  <p>使用 Qwen/Qwen2.5-Math-1.5B tokenizer 的精确统计；目标训练 context length = 4096。分析日期：2026-06-13 UTC。</p>
+</header>
+<main>
+  <section>
+    <h2>结论</h2>
+    <div class="note verdict">
+      <strong>原始 s1K 配方无法在 4096 context 下直接复刻。</strong>
+      原始训练序列中位数为 <strong>5,897 tokens</strong>，仅 <strong>127/1000（12.7%）</strong>
+      能完整放入 4096；数学样本中有 <strong>816/877（93.0%）</strong> 超长。
+    </div>
+    <div class="summary">
+      <div class="metric"><div class="label">完整序列 P50</div><div class="value">5,897</div><div class="sub">P90 = 7,335 tokens</div></div>
+      <div class="metric"><div class="label">4096 完整可用率</div><div class="value bad">12.7%</div><div class="sub">127 / 1,000 条</div></div>
+      <div class="metric"><div class="label">4096 截断后能看到 answer</div><div class="value bad">20.7%</div><div class="sub">其余只训练到半截思考</div></div>
+      <div class="metric"><div class="label">8192 完整可用率</div><div class="value good">98.8%</div><div class="sub">988 / 1,000 条</div></div>
+    </div>
+    <p><strong>最关键判断：</strong>s1K 的长度主要来自 Gemini 蒸馏推理轨迹，而不是题目。题目平均仅 127 tokens，
+      但 thinking 平均 4,692 tokens，最终 attempt 平均 803 tokens。Qwen2.5-Math-1.5B 的 4096 限制会直接切断核心训练信号。</p>
+    <div class="note recommend">
+      <strong>建议：</strong>若目标是忠实复刻 s1 的长推理行为，至少使用 8192 context；若必须使用 4096，
+      应先对 thinking 做短链蒸馏/重写，并将完整序列控制在约 3,800 tokens 内。不要直接右截断原始数据。
+    </div>
+  </section>
+
+  <section>
+    <h2>统计口径</h2>
+    <p>数据集共 1,000 条，无重复 question；每条均有且只有一条 <code>thinking_trajectories</code>。
+      依据原 s1 仓库的 <code>data/tokenization.py</code>，训练 assistant 内容是：</p>
+    <p><code>&lt;|im_start|&gt;think\n{thinking_trajectories[0]}\n&lt;|im_start|&gt;answer\nAnswer: {attempt}</code></p>
+    <p>“完整序列”包含 Qwen chat template、question、上述 thinking 和 attempt。分词器为
+      <code>Qwen/Qwen2.5-Math-1.5B</code>；原实验使用 Qwen2.5-32B-Instruct tokenizer 和
+      <code>block_size=32768</code>，并训练 5 epochs。</p>
+    <div class="note risk">
+      tokenizer 配置本身报告较大的 <code>model_max_length</code>，但本报告严格按项目给定的
+      Qwen2.5-Math-1.5B 实际训练约束 <strong>4096</strong>，以及推理 <strong>max_tokens=3072</strong> 做决策。
+    </div>
+  </section>
+
+  <section>
+    <h2>Token 长度分布</h2>
+    <table>
+      <thead><tr><th>组成</th><th class="num">平均</th><th class="num">P25</th><th class="num">P50</th><th class="num">P75</th><th class="num">P90</th><th class="num">P95</th><th class="num">P99</th><th class="num">最大</th></tr></thead>
+      <tbody>
+        <tr><td>Question</td><td class="num">127</td><td class="num">74</td><td class="num">109</td><td class="num">155</td><td class="num">217</td><td class="num">278</td><td class="num">420</td><td class="num">830</td></tr>
+        <tr><td>Thinking trajectory</td><td class="num">4,692</td><td class="num">4,141</td><td class="num">4,969</td><td class="num">5,618</td><td class="num">6,136</td><td class="num">6,675</td><td class="num">7,296</td><td class="num">7,995</td></tr>
+        <tr><td>Final attempt</td><td class="num">803</td><td class="num">649</td><td class="num">774</td><td class="num">924</td><td class="num">1,084</td><td class="num">1,240</td><td class="num">1,649</td><td class="num">3,937</td></tr>
+        <tr><td>Assistant response</td><td class="num">5,500</td><td class="num">4,910</td><td class="num">5,745</td><td class="num">6,438</td><td class="num">7,157</td><td class="num">7,576</td><td class="num">8,052</td><td class="num">8,892</td></tr>
+        <tr><td><strong>完整训练序列</strong></td><td class="num"><strong>5,657</strong></td><td class="num">5,042</td><td class="num"><strong>5,897</strong></td><td class="num">6,596</td><td class="num">7,335</td><td class="num">7,766</td><td class="num">8,256</td><td class="num">9,108</td></tr>
+      </tbody>
+    </table>
+    <p class="small">字符/token 比率：question 3.007，thinking 2.345，完整序列 2.391。若只能粗略按字符估算，英文数学推理建议用“字符数 ÷ 2.4”，而不是常见的 ÷ 4。</p>
+
+    <h3>不同 context limit 的完整可用率</h3>
+    <div class="bar-row"><span>2048</span><div class="bar-track"><div class="bar badbar" style="width:3.9%"></div></div><strong>3.9%</strong></div>
+    <div class="bar-row"><span>3072</span><div class="bar-track"><div class="bar badbar" style="width:8%"></div></div><strong>8.0%</strong></div>
+    <div class="bar-row"><span>4096</span><div class="bar-track"><div class="bar badbar" style="width:12.7%"></div></div><strong>12.7%</strong></div>
+    <div class="bar-row"><span>8192</span><div class="bar-track"><div class="bar" style="width:98.8%"></div></div><strong>98.8%</strong></div>
+    <div class="bar-row"><span>16384</span><div class="bar-track"><div class="bar" style="width:100%"></div></div><strong>100%</strong></div>
+  </section>
+
+  <section>
+    <h2>4096 截断的实际后果</h2>
+    <table>
+      <thead><tr><th>限制</th><th class="num">完整样本</th><th class="num">完整率</th><th class="num">右截断后到达 answer 的样本</th><th class="num">保留的监督 token</th></tr></thead>
+      <tbody>
+        <tr><td>2048</td><td class="num">39</td><td class="num">3.9%</td><td class="num">76（7.6%）</td><td class="num">34.0%</td></tr>
+        <tr><td>3072</td><td class="num">80</td><td class="num">8.0%</td><td class="num">111（11.1%）</td><td class="num">51.6%</td></tr>
+        <tr><td><strong>4096</strong></td><td class="num"><strong>127</strong></td><td class="num bad">12.7%</td><td class="num bad">207（20.7%）</td><td class="num">68.3%</td></tr>
+        <tr><td>8192</td><td class="num">988</td><td class="num good">98.8%</td><td class="num">1,000（100%）</td><td class="num">99.9%</td></tr>
+      </tbody>
+    </table>
+    <p>4096 右截断虽然按 token 数仍保留 68.3% 的监督内容，但只有 20.7% 的样本能进入最终 answer，
+      其余样本会以未完成的思考结尾。这样训练会强化冗长展开，却大多不监督“收束并给出答案”的行为。</p>
+    <p>若直接丢弃所有超长样本，只留下 127 条，则只保留原数据约 <strong>5.8%</strong> 的 assistant 监督 token，
+      且任务组成明显偏向 science/crossword，不再代表原 s1K。</p>
+
+    <h3>推理预算 max_tokens=3072</h3>
+    <p>仅 <strong>90/1000（9.0%）</strong> 的原始 assistant response 能在 3072 新 token 内完整生成；
+      即使只看 thinking，也仅 <strong>122/1000（12.2%）</strong> 能完整生成。训练时保留原长轨迹、推理时只给 3072，
+      存在明显的训练/推理长度错配。</p>
+  </section>
+
+  <section>
+    <h2>任务与来源分布</h2>
+    <table>
+      <thead><tr><th>任务类</th><th class="num">数量</th><th class="num">占比</th><th class="num">完整序列均值</th><th class="num">P50</th><th class="num">超过 4096</th></tr></thead>
+      <tbody>
+        <tr><td>Math</td><td class="num">877</td><td class="num">87.7%</td><td class="num">5,911</td><td class="num">6,048</td><td class="num bad">816（93.0%）</td></tr>
+        <tr><td>Science</td><td class="num">108</td><td class="num">10.8%</td><td class="num">4,083</td><td class="num">4,152</td><td class="num">56（51.9%）</td></tr>
+        <tr><td>Crossword</td><td class="num">15</td><td class="num">1.5%</td><td class="num">2,189</td><td class="num">2,549</td><td class="num">1（6.7%）</td></tr>
+      </tbody>
+    </table>
+    <p>若按 4096 只保留完整样本，最终仅剩 math 61 条、science 52 条、crossword 14 条；
+      math 从 87.7% 降至 48.0%，因此简单过滤会严重改变训练目标。</p>
+    <table>
+      <thead><tr><th>主要来源族</th><th class="num">数量</th><th class="num">占比</th><th class="num">P50 tokens</th><th class="num">超过 4096</th></tr></thead>
+      <tbody>
+        <tr><td>qq8933/AIME_1983_2024</td><td class="num">287</td><td class="num">28.7%</td><td class="num">5,657</td><td class="num">98.3%</td></tr>
+        <tr><td>AI-MO/NuminaMath-CoT</td><td class="num">275</td><td class="num">27.5%</td><td class="num">6,347</td><td class="num">94.9%</td></tr>
+        <tr><td>Idavidrein/gpqa</td><td class="num">88</td><td class="num">8.8%</td><td class="num">4,035</td><td class="num">50.0%</td></tr>
+        <tr><td>qfq/openaimath</td><td class="num">85</td><td class="num">8.5%</td><td class="num">6,686</td><td class="num">98.8%</td></tr>
+        <tr><td>Hothan/OlympiadBench</td><td class="num">79</td><td class="num">7.9%</td><td class="num">5,608</td><td class="num">83.5%</td></tr>
+        <tr><td>KbsdJames/Omni-MATH</td><td class="num">71</td><td class="num">7.1%</td><td class="num">6,759</td><td class="num">95.8%</td></tr>
+      </tbody>
+    </table>
+    <p>前两大来源占 56.2%；AIME、NuminaMath、OpenAI Math 和 Omni-MATH 基本都无法直接放入 4096。
+      数据也不是纯数学集：12.3% 为 science/crossword。若复刻目标是数学模型，应先决定是否保留这些跨域样本。</p>
+  </section>
+
+  <section>
+    <h2>适配方案</h2>
+    <table>
+      <thead><tr><th>方案</th><th>4096 可用性</th><th>判断</th></tr></thead>
+      <tbody>
+        <tr><td>原始完整 s1K，丢弃超长</td><td>127/1000 完整可用</td><td class="bad">不建议；规模与任务分布都被破坏。</td></tr>
+        <tr><td>原始完整 s1K，右截断到 4096</td><td>仅 20.7% 到达 answer</td><td class="bad">不建议；大多数监督停在半截 thinking。</td></tr>
+        <tr><td>仅训练 <code>attempt</code></td><td>999/1000 完整可用；P50 约 921</td><td>可作为短解 SFT，但不再复刻 s1 的蒸馏长推理。</td></tr>
+        <tr><td>仅训练 <code>solution</code></td><td>1000/1000 完整可用；最大约 2,946</td><td>最易训练，但目标变为原始参考解，不是 Gemini reasoning。</td></tr>
+        <tr><td>短链蒸馏 thinking + 完整 attempt</td><td>目标完整序列 ≤ 3,800</td><td class="good">4096 条件下最推荐；保留 reasoning→answer 结构。</td></tr>
+        <tr><td>提升 context 到 8192</td><td>988/1000 完整可用</td><td class="good">最接近原始 s1 配方。</td></tr>
+      </tbody>
+    </table>
+    <ol>
+      <li><strong>忠实复刻优先：</strong>将训练 context 提升至 8192；12 条超长样本可单独裁剪或丢弃。</li>
+      <li><strong>必须 4096：</strong>对每条 thinking 做语义压缩，而非 token 级硬截断；预留 question/template 与约 800-token attempt，建议 thinking 目标上限约 2,800–3,000 tokens。</li>
+      <li><strong>推理预算同步：</strong>由于 max_tokens=3072，短链蒸馏后的 response 最好也控制在 3,072 内，否则训练目标仍无法在部署时完整生成。</li>
+      <li><strong>保持分布：</strong>压缩后按 cot_type/source_type 分层抽查，避免 4k 适配过程进一步偏向较短的 science/crossword。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>其他内容信号</h2>
+    <ul>
+      <li><code>attempt</code> 中含 <code>\boxed</code>：929 条（92.9%），最终答案格式总体稳定。</li>
+      <li>thinking 中含 “Alternatively”：132 条（13.2%）；含 “Wait”：19 条（1.9%）。Gemini 轨迹存在一定回溯/替代路径，但 “Wait” 并不是主要模式。</li>
+      <li>最长完整序列为 9,108 tokens；所有样本均小于 16,384，原始 32k block_size 实际有较大余量。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>复现信息</h2>
+    <ul>
+      <li>数据集：<a href="https://huggingface.co/datasets/simplescaling/s1K">simplescaling/s1K</a>，commit <code>278d72baaa2b887a7e76a70a0ae254a5a45536e4</code></li>
+      <li>s1 源码：<a href="https://github.com/simplescaling/s1">simplescaling/s1</a>，commit <code>77272c6e925d610257a50b520bad15330b513389</code></li>
+      <li>Parquet SHA-256：<code>899de0fb79be8465efb311aec94c4dcf9863c72684610b4626a8dacef2c2d2e7</code></li>
+      <li>可复现分析脚本：<code>exp/dataset-analysis/s1k/analyze.py</code>；机器可读结果：<code>stats.json</code>、<code>sample_lengths.csv</code></li>
+    </ul>
+  </section>
+</main>
+<footer>本报告聚焦训练复刻决策，不评估推理轨迹的数学正确性或数据污染。</footer>
+</body>
+</html>

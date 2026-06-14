@@ -1,0 +1,51 @@
+{
+  "gsm8k": {
+    "timestamp": "20260613_091753",
+    "samples": 1319,
+    "correct": 728,
+    "accuracy": 0.551933,
+    "non_empty_rate": 1.0,
+    "boxed_rate": 0.97953,
+    "max_token_rate": 0.280516,
+    "output_tokens_mean": 1076.36,
+    "output_tokens_median": 330
+  },
+  "math_500": {
+    "timestamp": "20260613_091753",
+    "samples": 500,
+    "correct": 115,
+    "accuracy": 0.23,
+    "non_empty_rate": 1.0,
+    "boxed_rate": 0.956,
+    "max_token_rate": 0.532,
+    "output_tokens_mean": 1977.87,
+    "output_tokens_median": 3072.0,
+    "levels": {
+      "Level 1": {
+        "samples": 43,
+        "correct": 6,
+        "accuracy": 0.139535
+      },
+      "Level 2": {
+        "samples": 90,
+        "correct": 21,
+        "accuracy": 0.233333
+      },
+      "Level 3": {
+        "samples": 105,
+        "correct": 33,
+        "accuracy": 0.314286
+      },
+      "Level 4": {
+        "samples": 128,
+        "correct": 28,
+        "accuracy": 0.21875
+      },
+      "Level 5": {
+        "samples": 134,
+        "correct": 27,
+        "accuracy": 0.201493
+      }
+    }
+  }
+}

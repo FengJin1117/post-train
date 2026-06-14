@@ -1,0 +1,65 @@
+{
+  "gsm8k": {
+    "samples": 1319,
+    "matched": 0,
+    "examples": []
+  },
+  "math_500": {
+    "samples": 500,
+    "matched": 4,
+    "examples": [
+      {
+        "eval_index": 152,
+        "matching_ngram": "$k$ in the closed interval $[-500,500]$ for which the equation $\\log(kx)=2\\log(x+2)$ has exactly"
+      },
+      {
+        "eval_index": 216,
+        "matching_ngram": "$0 \\le \\lambda \\le 4,$ and let $f : [0,1] \\to [0,1]$ be"
+      },
+      {
+        "eval_index": 244,
+        "matching_ngram": "in terms of the side lengths $a,$ $b,$ $c$ and circumradius $r$ of"
+      },
+      {
+        "eval_index": 446,
+        "matching_ngram": "\"i am thinking of a polynomial whose roots are all positive integers. the"
+      }
+    ]
+  },
+  "aime24": {
+    "samples": 30,
+    "matched": 1,
+    "examples": [
+      {
+        "eval_index": 7,
+        "matching_ngram": "$m$ and $p$ are relatively prime, and $n$ is not divisible by the"
+      }
+    ]
+  },
+  "aime25": {
+    "samples": 30,
+    "matched": 5,
+    "examples": [
+      {
+        "eval_index": 5,
+        "matching_ngram": "where $m$ and $n$ are relatively prime positive integers. find $m + n$."
+      },
+      {
+        "eval_index": 10,
+        "matching_ngram": "are positive integers and $b$ is not divisible by the square of any"
+      },
+      {
+        "eval_index": 11,
+        "matching_ngram": "are positive integers and $p$ is not divisible by the square of any"
+      },
+      {
+        "eval_index": 27,
+        "matching_ngram": "$c$ is not divisible by the square of any prime. find $a +"
+      },
+      {
+        "eval_index": 29,
+        "matching_ngram": "where $m$ and $n$ are relatively prime positive integers. find $m + n.$"
+      }
+    ]
+  }
+}

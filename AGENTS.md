@@ -51,6 +51,36 @@ swift eval --model <model-or-checkpoint> --eval_backend Native --eval_dataset gs
 Use `CUDA_VISIBLE_DEVICES=...` to select GPUs. Set `NPROC_PER_NODE=<gpu-count>` for distributed `sft` and `rlhf`.
 For LoRA checkpoints, pass `--adapters <checkpoint>` during inference/evaluation when appropriate.
 
+## Math Benchmark Usage
+
+使用 `vllm` 环境运行 benchmark。内置 benchmark 可分别调用：
+
+```bash
+conda run -n vllm env PYTHONPATH="$PWD/ms-swift" swift eval \
+  --model <model-or-checkpoint> --eval_backend Native --eval_dataset gsm8k
+conda run -n vllm env PYTHONPATH="$PWD/ms-swift" swift eval \
+  --model <model-or-checkpoint> --eval_backend Native --eval_dataset math_500
+conda run -n vllm env PYTHONPATH="$PWD/ms-swift" swift eval \
+  --model <model-or-checkpoint> --eval_backend Native --eval_dataset aime24
+conda run -n vllm env PYTHONPATH="$PWD/ms-swift" swift eval \
+  --model <model-or-checkpoint> --eval_backend Native --eval_dataset aime25
+```
+
+GaoKao 数学使用项目本地 EvalScope 插件，两个分数必须独立报告：
+
+```bash
+conda run -n vllm env PYTHONPATH="$PWD/ms-swift" swift eval \
+  --model <model-or-checkpoint> --eval_backend Native \
+  --external_plugins "$PWD/benchmarks/gaokao_math/plugin.py" \
+  --eval_dataset gaokao_math_cloze
+conda run -n vllm env PYTHONPATH="$PWD/ms-swift" swift eval \
+  --model <model-or-checkpoint> --eval_backend Native \
+  --external_plugins "$PWD/benchmarks/gaokao_math/plugin.py" \
+  --eval_dataset gaokao_math_qa
+```
+
+`gaokao_math_cloze` 对多项填空按顺序严格全对计分；`gaokao_math_qa` 对单选和多选均采用严格选项集合匹配，不给予部分分。
+
 ## Dataset Shapes
 
 - SFT: `messages` ending with an assistant answer.
@@ -58,3 +88,10 @@ For LoRA checkpoints, pass `--adapters <checkpoint>` during inference/evaluation
 - PPO/GRPO: prompt-only `messages`; GRPO math rewards commonly also need a `solution` column.
 - Custom local JSON/JSONL/CSV files can be passed directly with `--dataset <path>`; use `--columns` for field mapping.
 
+## Base Model Features
+
+- `Qwen2.5-Math-1.5B`：have a much lower limit of 4096（prompt length = 1024，response length = 3072，max_tokens=3072）
+
+## Reproduction References
+
+- s1 / s1K reproduction notes: `references/s1K/REPRODUCTION_NOTES.md`

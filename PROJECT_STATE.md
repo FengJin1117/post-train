@@ -42,6 +42,7 @@ Benchmarks:
 - Analysis of LoRA-SFT benchmark regression and repetitive long generations
 - Clean V2 LoRA-SFT pipeline: strict data filtering, three controlled runs, and checkpoint benchmark gates
 - Clean V2 E1 checkpoint benchmark gate
+- Qwen2.5-3B base Clean-10K baseline and dual-recipe LoRA-SFT experiment
 
 ## Blockers
 
@@ -63,8 +64,9 @@ The next experiment should diagnose response repetition and data/format mismatch
 ## Next Step
 
 1. Gate the five Clean V2 E1 checkpoints.
-2. Train and gate E2, then use the recorded decision for E3.
-3. Run full GSM8K/MATH-500/AIME25 evaluation for the winning checkpoint.
+2. Complete Qwen2.5-3B base baseline, then run B1/B2 dual-recipe LoRA-SFT.
+3. Train and gate Instruct Clean V2 E2, then use the recorded decision for E3.
+4. Run full GSM8K/MATH-500/AIME25 evaluation for winning checkpoints.
 
 ## Clean V2 Checkpoint Gate
 

@@ -1,0 +1,58 @@
+{
+  "winner": "r0-original",
+  "selection_rule": "gate mean desc, max-token mean asc, r0 tie-break",
+  "runs": {
+    "r0-original": {
+      "gate_mean": 0.5075,
+      "max_token_mean": 0.365,
+      "metrics": {
+        "gsm8k": {
+          "samples": 200,
+          "correct": 109,
+          "accuracy": 0.545,
+          "non_empty_rate": 1.0,
+          "boxed_rate": 0.755,
+          "max_token_rate": 0.26,
+          "output_tokens_mean": 704.12,
+          "output_tokens_median": 672.5
+        },
+        "math_500": {
+          "samples": 100,
+          "correct": 47,
+          "accuracy": 0.47,
+          "non_empty_rate": 1.0,
+          "boxed_rate": 0.54,
+          "max_token_rate": 0.47,
+          "output_tokens_mean": 1440.46,
+          "output_tokens_median": 1473.5
+        }
+      }
+    },
+    "r1-conservative": {
+      "gate_mean": 0.475,
+      "max_token_mean": 0.45,
+      "metrics": {
+        "gsm8k": {
+          "samples": 200,
+          "correct": 118,
+          "accuracy": 0.59,
+          "non_empty_rate": 1.0,
+          "boxed_rate": 0.805,
+          "max_token_rate": 0.28,
+          "output_tokens_mean": 629.66,
+          "output_tokens_median": 550.5
+        },
+        "math_500": {
+          "samples": 100,
+          "correct": 36,
+          "accuracy": 0.36,
+          "non_empty_rate": 1.0,
+          "boxed_rate": 0.47,
+          "max_token_rate": 0.62,
+          "output_tokens_mean": 1563.93,
+          "output_tokens_median": 2048.0
+        }
+      }
+    }
+  }
+}

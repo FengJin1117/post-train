@@ -1,0 +1,51 @@
+{
+  "gsm8k": {
+    "timestamp": "20260613_090930",
+    "samples": 2,
+    "correct": 1,
+    "accuracy": 0.5,
+    "non_empty_rate": 1.0,
+    "boxed_rate": 1.0,
+    "max_token_rate": 0.5,
+    "output_tokens_mean": 1648,
+    "output_tokens_median": 1648.0
+  },
+  "math_500": {
+    "timestamp": "20260613_091133",
+    "samples": 10,
+    "correct": 4,
+    "accuracy": 0.4,
+    "non_empty_rate": 1.0,
+    "boxed_rate": 0.9,
+    "max_token_rate": 0.3,
+    "output_tokens_mean": 1257.7,
+    "output_tokens_median": 564.5,
+    "levels": {
+      "Level 1": {
+        "samples": 2,
+        "correct": 1,
+        "accuracy": 0.5
+      },
+      "Level 2": {
+        "samples": 2,
+        "correct": 1,
+        "accuracy": 0.5
+      },
+      "Level 3": {
+        "samples": 2,
+        "correct": 1,
+        "accuracy": 0.5
+      },
+      "Level 4": {
+        "samples": 2,
+        "correct": 1,
+        "accuracy": 0.5
+      },
+      "Level 5": {
+        "samples": 2,
+        "correct": 0,
+        "accuracy": 0.0
+      }
+    }
+  }
+}

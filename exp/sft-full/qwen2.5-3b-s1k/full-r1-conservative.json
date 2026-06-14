@@ -1,0 +1,42 @@
+{
+  "gsm8k": {
+    "samples": 1319,
+    "correct": 737,
+    "accuracy": 0.558757,
+    "non_empty_rate": 1.0,
+    "boxed_rate": 0.768006,
+    "max_token_rate": 0.27445,
+    "output_tokens_mean": 2811.73,
+    "output_tokens_median": 550
+  },
+  "math_500": {
+    "samples": 500,
+    "correct": 130,
+    "accuracy": 0.26,
+    "non_empty_rate": 1.0,
+    "boxed_rate": 0.378,
+    "max_token_rate": 0.666,
+    "output_tokens_mean": 6115.34,
+    "output_tokens_median": 8192.0
+  },
+  "aime24": {
+    "samples": 30,
+    "correct": 0,
+    "accuracy": 0.0,
+    "non_empty_rate": 1.0,
+    "boxed_rate": 0.0,
+    "max_token_rate": 0.933333,
+    "output_tokens_mean": 8140.2,
+    "output_tokens_median": 8192.0
+  },
+  "aime25": {
+    "samples": 30,
+    "correct": 1,
+    "accuracy": 0.033333,
+    "non_empty_rate": 1.0,
+    "boxed_rate": 0.0,
+    "max_token_rate": 0.933333,
+    "output_tokens_mean": 8114.13,
+    "output_tokens_median": 8192.0
+  }
+}
